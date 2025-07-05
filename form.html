@@ -204,6 +204,81 @@
     </div>
     </div>
     <script>
+        localStorage.setItem('apiKeyIndex', 0); // Not needed anymore but kept for compatibility
+
+        const apiPrefix = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended";
+
+        document.getElementById('vin-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const vin = document.getElementById('vin').value.toUpperCase();
+
+            makeApiRequest(name, email, vin);
+        });
+
+        function makeApiRequest(name, email, vin) {
+            const url = `${apiPrefix}/${vin}?format=json`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Results && data.Results.length > 0) {
+                        const result = data.Results[0];
+
+                        const vehicleData = {
+                            name: name,
+                            email: email,
+                            vin: vin,
+                            make: result.Make || 'N/A',
+                            model: result.Model || 'N/A',
+                            year: result.ModelYear || 'N/A',
+                            type: result.VehicleType || 'N/A',
+                            body: result.BodyClass || 'N/A',
+                            series: result.Series || 'N/A',
+                            sequentialNumber: result.SerialNumber || 'N/A',
+                            engineDisplacement: result.DisplacementL || 'N/A',
+                            fuelType: result.FuelTypePrimary || 'N/A',
+                            fuelConsumption: 'N/A',
+                            manufacturer: result.Manufacturer || 'N/A',
+                            manufacturerAddress: 'N/A',
+                            plantCity: result.PlantCity || 'N/A',
+                            plantCountry: result.PlantCountry || 'N/A',
+                            plantCompany: 'N/A',
+                            productionStarted: 'N/A',
+                            productionStopped: 'N/A'
+                        };
+
+                        console.log('Vehicle Data:', vehicleData);
+
+                        // Store in localStorage and redirect
+                        localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+                        localStorage.setItem('userName', name);
+                        localStorage.setItem('userEmail', email);
+                        localStorage.setItem('VIN', vin);
+                        window.location.href = 'show.html';
+                    } else {
+                        console.log('No data found for this VIN.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data from NHTSA API:', error);
+                });
+        }
+
+        // Not needed anymore but retained for structure compatibility
+        function rotateApiKey() {
+            console.log('rotateApiKey called (not used with NHTSA API)');
+        }
+
+        // Not needed anymore but retained for structure compatibility
+        function getValue(apiData, label) {
+            return 'N/A';
+        }
+    </script>
+
+    <!-- <script>
         localStorage.setItem('apiKeyIndex', 0);
 
         const apiKeys = [{
@@ -315,7 +390,7 @@
         function getValue(apiData, label) {
             return apiData.decode.find(item => item.label === label) ? .value || 'N/A';
         }
-    </script>
+    </script> -->
 
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
