@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            font-family: Arial, sans-serif;
+            /* background-image: url(bg.jpg); */
+            background-color: #660266;
+            background-size: cover;
+            /* Ensures the image covers the entire viewport */
+            background-position: center;
+            /* Center the image */
+            background-repeat: no-repeat;
+            /* Prevents the image from repeating */
+        }
+
+        .container {
+            position: relative;
+            max-width: 700px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            /* Dark transparent background */
+            padding: 25px 30px;
+            border-radius: 10px;
+            /* Smooth edges */
+
+            /* Black fading glow effect */
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+
+            /* Blurs the background for a blending effect */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            /* Safari support */
+
+            z-index: 2;
+        }
+
+        .container .title {
+            font-size: 25px;
+            font-weight: 500;
+            position: relative;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .details {
+            margin: 20px 0;
+            text-align: left;
+            color: white;
+        }
+
+        .details span {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            margin-top: 20px;
+        }
+
+        .button input {
+            height: 45px;
+            width: 100%;
+            border-radius: 5px;
+            border: none;
+            background-color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: black;
+        }
+
+        /* .button input:hover {
+            background: linear-gradient(to top, rgb(228, 3, 3), rgb(88, 1, 1));
+        } */
+
+        #vin-number {
+            color: red;
+        }
+
+        .F1 {
+            font-weight: 300;
+        }
+
+        /* Fullscreen Background Video */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body style="margin: 0; padding: 0; height: 100vh; overflow: hidden; position: relative;">
+
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="movie.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="container">
+        <div class="title">Vehicle Report</div>
+        <div class="details">
+            <p id="report-message">We have found detailed information for <span id="vin-number"></span></p>
+            <p>Here are the basic details:</p>
+            <h3>Make: <span id="make" class="F1"></span></h3>
+            <h3>Model: <span id="model" class="F1"></span></h3>
+            <h3>Year: <span id="year" class="F1"></span></h3>
+            <h3>Product Type: <span id="type" class="F1"></span></h3>
+            <h3>Body Type: <span id="body" class="F1"></span></h3>
+        </div>
+        <div class="button">
+            <input type="button" value="Get Full Report" onclick="redirectToPayment()">
+        </div>
+        <p style="color: white !important; margin-top: 10px;">NOTE: Information availability differs by vehicle. Not all
+            reports may
+            include every record.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const vehicleData = JSON.parse(localStorage.getItem('vehicleData'));
+
+            if (vehicleData) {
+                document.getElementById('vin-number').textContent = vehicleData.vin;
+                document.getElementById('make').textContent = vehicleData.make || 'N/A';
+                document.getElementById('model').textContent = vehicleData.model || 'N/A';
+                document.getElementById('year').textContent = vehicleData.year || 'N/A';
+                document.getElementById('type').textContent = vehicleData.type || 'N/A';
+                document.getElementById('body').textContent = vehicleData.body || 'N/A';
+            } else {
+                document.getElementById('report-message').textContent =
+                    'No vehicle data found. Please go back and try again.';
+            }
+        });
+
+        function redirectToPayment() {
+            sendEmail();
+
+            // setTimeout(function () {
+            //     window.location.href = "payment.html";
+            // }, 1000);
+        }
+
+        // Initialize EmailJS
+
+        function sendEmail() {
+            emailjs.init("NJfwtHFlrdTM8993K"); // Initialize here
+            const name = localStorage.getItem('userName');
+            const email = localStorage.getItem('userEmail');
+            const vin = localStorage.getItem('VIN');
+
+            const formData = {
+                name: name,
+                email: email,
+                vin: vin
+            };
+
+            if (!name || !email || !vin) {
+                console.error("Missing data:", {
+                    name,
+                    email,
+                    vin
+                });
+                alert("Error: Missing user data. Please try again.");
+                return;
+            }
+
+            emailjs.send("service_scw2xtg", "template_6q6dcli", formData)
+                .then(function (response) {
+                    console.log("Email sent successfully", response);
+                    window.location.href = "payment.html";
+                }, function (error) {
+                    console.error("Email send error:", error);
+                    alert("Email send error: " + error.text);
+                });
+        }
+    </script>
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function () {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/6828784e8ec535190f11be2a/1irf1bt5e';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
+</body>
+
+
+</html>
